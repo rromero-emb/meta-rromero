@@ -23,11 +23,13 @@ jobs:
             chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
             python3-jinja2 python3-subunit zstd liblz4-tool file locales libacl1 shellcheck
           sudo locale-gen en_US.UTF-8
+          # Ubuntu 24.04 AppArmor blocks the unprivileged user namespaces bitbake uses to isolate tasks
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           pip install --user kas==5.5
       - name: Shellcheck
         run: shellcheck scripts/*.sh
       - name: No private keys in the layer
-        run: "! grep -rIlE -- '-----BEGIN ([A-Z]+ )?PRIVATE KEY' --exclude-dir=.git ."
+        run: "! grep -rIlE --exclude-dir=.git -e '-----BEGIN ([A-Z]+ )?PRIVATE KEY' ."
       - name: Parse and dry-run the task graph
         env:
           KAS_WORK_DIR: ${{ runner.temp }}/work
