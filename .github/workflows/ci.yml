@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  layer:
+    # No full build on a free runner (needs ~60 GB and hours). This job checks that the layer
+    # parses against pinned upstream revisions and that the whole task graph resolves.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - name: Host packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gawk wget git diffstat unzip texinfo gcc build-essential \
+            chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
+            python3-jinja2 python3-subunit zstd liblz4-tool file locales libacl1 shellcheck
+          sudo locale-gen en_US.UTF-8
+          pip install --user kas==5.5
+      - name: Shellcheck
+        run: shellcheck scripts/*.sh
+      - name: No private keys in the layer
+        run: "! grep -rIl 'PRIVATE KEY' --exclude-dir=.git ."
+      - name: Parse and dry-run the task graph
+        env:
+          KAS_WORK_DIR: ${{ runner.temp }}/work
+        run: |
+          scripts/create-dev-keys.sh "$KAS_WORK_DIR/build"
+          kas shell kas/dev.yml -c "bitbake -p && bitbake -n rromero-image rromero-bundle && bitbake-layers show-layers"
+      - name: yocto-check-layer (Yocto Project Compatible checks)
+        env:
+          KAS_WORK_DIR: ${{ runner.temp }}/work
+        run: |
+          W="$KAS_WORK_DIR"
+          kas shell kas/dev.yml -c "yocto-check-layer --no-auto-dependency \
+            --dependency $W/meta-openembedded/meta-oe $W/meta-rauc $W/meta-rauc-community/meta-rauc-qemux86 \
+            -- $GITHUB_WORKSPACE"

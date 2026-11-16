@@ -1,0 +1,11 @@
+# Layout from meta-rauc-qemux86 (MIT, rauc/meta-rauc-community), root slots grown to 400 MiB.
+# sda1 boot (EFI, GRUB) | shadow copy for atomic bootloader updates | sda2 grubenv
+# sda3 rescue | sda4 root A | sda5 root B | sda6 data
+bootloader --ptable gpt
+part --fixed-size 50M --source rawcopy --sourceparams="file=efi-boot.vfat" --fstype=vfat --ondisk sda --label boot --active --align 4096
+part --fixed-size 50M --ondisk sda --align 4096 --no-table
+part --fixed-size 10M --source rawcopy --sourceparams="file=grubenv.vfat" --fstype=vfat --ondisk sda --label grubenv --align 1024
+part /rescue --source rootfs --ondisk sda --fstype=ext4 --label rescue --align 1024
+part / --source rootfs --ondisk sda --fstype=ext4 --label root_a --fixed-size=400M --align 4096
+part / --source empty --ondisk sda --fstype=ext4 --label root_b --fixed-size=400M --align 4096
+part /data --fixed-size 100M --ondisk sda --fstype=ext4 --label data --align 4096

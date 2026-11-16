@@ -1,0 +1,13 @@
+# Development overlay: root login without password over SSH, needed by testimage.
+# Never use for a production image.
+header:
+  version: 14
+  includes:
+    - kas/rromero-qemux86-64.yml
+
+local_conf_header:
+  dev: |
+    EXTRA_IMAGE_FEATURES += "allow-empty-password empty-root-password allow-root-login"
+    TEST_RUNQEMUPARAMS = "slirp nographic ovmf wic"
+    TEST_SERVER_IP = "127.0.0.1"
+    IMAGE_CLASSES += "testimage"

@@ -1,0 +1,45 @@
+header:
+  version: 14
+
+machine: qemux86-64
+distro: rromero
+target:
+  - rromero-image
+  - rromero-bundle
+
+repos:
+  meta-rromero:
+  poky:
+    url: https://git.yoctoproject.org/poky
+    branch: scarthgap
+    commit: 6b7c1066f778db5a6b3e35400617b10342988fa8
+    layers:
+      meta:
+      meta-poky:
+  meta-openembedded:
+    url: https://git.openembedded.org/meta-openembedded
+    branch: scarthgap
+    commit: 2db6aece32c7f8ebf6015b468e1b4e21de072e3b
+    layers:
+      meta-oe:
+  meta-rauc:
+    url: https://github.com/rauc/meta-rauc.git
+    branch: scarthgap
+    commit: d63878f20eba7a85ecf53566e7a3377e78bb46ac
+  meta-rauc-community:
+    url: https://github.com/rauc/meta-rauc-community.git
+    branch: scarthgap
+    commit: f037f3a81ef64d6ef99218b7252a1736c3867a03
+    layers:
+      meta-rauc-qemux86:
+
+local_conf_header:
+  rromero-machine: |
+    # EFI boot through GRUB, as in meta-rauc-qemux86
+    MACHINE_FEATURES:append = " pcbios efi"
+    EXTRA_IMAGEDEPENDS += "ovmf"
+    PREFERRED_RPROVIDER_virtual-grub-bootconf = "rauc-qemu-grubconf"
+    QB_DEFAULT_FSTYPE = "wic"
+  build-hygiene: |
+    INHERIT += "rm_work"
+    BB_DISKMON_DIRS = "STOPTASKS,${TMPDIR},1G,100K STOPTASKS,${DL_DIR},1G,100K HALT,${TMPDIR},100M,1K"
