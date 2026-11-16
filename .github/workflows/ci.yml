@@ -27,7 +27,7 @@ jobs:
       - name: Shellcheck
         run: shellcheck scripts/*.sh
       - name: No private keys in the layer
-        run: "! grep -rIl 'PRIVATE KEY' --exclude-dir=.git ."
+        run: "! grep -rIlE -- '-----BEGIN ([A-Z]+ )?PRIVATE KEY' --exclude-dir=.git ."
       - name: Parse and dry-run the task graph
         env:
           KAS_WORK_DIR: ${{ runner.temp }}/work
