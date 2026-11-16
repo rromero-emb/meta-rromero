@@ -40,7 +40,4 @@ jobs:
         env:
           KAS_WORK_DIR: ${{ runner.temp }}/work
         run: |
-          W="$KAS_WORK_DIR"
-          kas shell kas/dev.yml -c "yocto-check-layer --no-auto-dependency \
-            --dependency $W/meta-openembedded/meta-oe $W/meta-rauc $W/meta-rauc-community/meta-rauc-qemux86 \
-            -- $GITHUB_WORKSPACE"
+          kas shell kas/dev.yml -c "$GITHUB_WORKSPACE/scripts/check-layer.sh $KAS_WORK_DIR $GITHUB_WORKSPACE"

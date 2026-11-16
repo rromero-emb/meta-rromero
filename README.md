@@ -103,6 +103,11 @@ hardware.
   newer `vex` class) as a CI gate; the NVD database download is too slow for every CI run.
 - **Upgrade path**: scarthgap is the current LTS on most products; moving to wrynose (6.0 LTS) is a separate branch.
 
+## Maintainer
+
+Roberto Romero Justiniano ([@rromero-emb](https://github.com/rromero-emb)). Send patches as pull requests and bug
+reports as issues on GitHub.
+
 ## Licence
 
 MIT, see [COPYING.MIT](COPYING.MIT). Upstream layers keep their own licences.

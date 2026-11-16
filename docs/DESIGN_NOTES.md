@@ -41,3 +41,11 @@ systemd units, RAUC sees both slots and the right compatible, a random file is r
 inactive slot and becomes the boot target, the J1939 replay
 decodes the sample trace, `vcan` and `cansend` work, and the voice-notes pipeline completes with its fake engines on
 the target's Python.
+
+**yocto-check-layer and one known false positive.** CI runs the Yocto Project Compatible checks in a clean build
+directory (`scripts/check-layer.sh`). All pass except `test_signatures`, which reports one root-cause change:
+`core-image-minimal:do_rootfs_wicenv`, because `BBLAYERS` changed. That comes from the dependency, not from this
+layer: `meta-rauc-qemux86` adds `wic` to `core-image-minimal`, and poky's `WICVARS` includes `BBLAYERS`, so adding any
+layer on top changes it (an empty layer created with `bitbake-layers create-layer` on plain poky passes, because
+there `core-image-minimal` has no `wic`). The script accepts exactly that case and fails on any other difference,
+so a bbappend that leaked outside the `rromero` distro would still break CI.
